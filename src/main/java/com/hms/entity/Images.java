@@ -7,19 +7,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "country")
-public class Country {
+@Table(name = "images")
+public class Images {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "url", nullable = false, length = 2550)
+    private String url;
 
-//    @OneToMany(mappedBy = "country")
-//    private List<Property> properties;
-
-
+    @ManyToOne
+    @JoinColumn(name = "property_id")
+    private Property property;
 
 }

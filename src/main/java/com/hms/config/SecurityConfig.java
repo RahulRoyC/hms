@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.AuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -17,24 +16,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity httpSecurity//to take incoming http request
-    ) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+
         //h(cd)2
-        httpSecurity.csrf().disable().cors().disable();
-        httpSecurity.addFilterBefore(jwtFilter, AuthorizationFilter.class);
+        http.csrf().disable().cors().disable();
+        //csrf disable reason -
+        //cors disable reason
+
+        http.addFilterBefore(jwtFilter, AuthorizationFilter.class);
+
         //haap
-        httpSecurity.authorizeHttpRequests().anyRequest().permitAll();
+        http.authorizeHttpRequests().anyRequest().permitAll(); //If we want that all url can be accessed
 
-//        httpSecurity.authorizeHttpRequests().
-//                requestMatchers("/api/v1/users/login","/api/v1/users/signup",
-//                        "/api/v1/users/signup-property-owner").// ye vale url open rahenge bass
-//                permitAll().
-//                requestMatchers("/api/v1/country/addCountry").
-//                hasAnyRole("ADMIN","OWNER").
-//                anyRequest().
-//                authenticated();//other than that forbidden ho jayenge
 
-        return httpSecurity.build();//this build the above code in it
+//        http.authorizeHttpRequests().requestMatchers("/api/v1/users/signupuser",
+//                        "/api/v1/users/login","/api/v1/users/signupowner")
+//                .permitAll().requestMatchers("/api/v1/country/addcountry").hasAnyRole("ADMIN","OWNER")
+//                .anyRequest().authenticated();//will filter those urls which you want to be accessed without token
+
+        /*DefaultSecurityFilterChain build = http.build();
+        return build;*/
+
+        return http.build();
     }
 }

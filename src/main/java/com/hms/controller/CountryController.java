@@ -1,71 +1,64 @@
 package com.hms.controller;
 
-
+import com.hms.entity.AppUser;
 import com.hms.entity.Country;
-import com.hms.repo.CountryRepository;
+import com.hms.repository.CountryRepository;
 import com.hms.service.CountryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hms.service.PropertyService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/v1/country")
+@RequestMapping("api/v1/country")
 public class CountryController {
-//    @PostMapping("/addCountry")
-//    public String addCountry(){
-//        return "added";
-//    }
 
-    @Autowired
+    // http://localhost:8080/api/v1/country/addcountry
+
+    @PostMapping("/add")
+    public AppUser addCount(@AuthenticationPrincipal AppUser appUser){
+
+        return appUser;
+    }
+
+
     private CountryService countryService;
-    @Autowired
-    private CountryRepository countryRepository;
+    private PropertyService propertyService;
+    private CountryRepository repository;
 
-    @GetMapping
-    public List<Country> getAllCountries(){
-        return countryService.getAllCountries();
+    public CountryController(CountryService countryService, PropertyService propertyService, CountryRepository repository) {
+        this.countryService = countryService;
+        this.propertyService = propertyService;
+        this.repository = repository;
     }
 
-    @PostMapping("/addCountry")
-    public Country addCountry(
+    @PostMapping
+    public ResponseEntity<Country> addCountry(
             @RequestBody Country country
-            ){
-        return countryService.addCountry(country);
+    ){
+        Country addedCountries = countryService.addCountries(country);
+
+        return new ResponseEntity<>(addedCountries, HttpStatus.CREATED);
     }
 
-    //get a country by id
-    @GetMapping("/{id}")
-    public ResponseEntity<Country> getCountryById(@PathVariable Long id){
-        Country country = countryService.getCountryById(id);
-        if (country!=null){
-            return ResponseEntity.ok(country);
-        }else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // Method to delete country by ID and its related properties
+    @DeleteMapping("/{countryId}")
+    public ResponseEntity<String> deleteCountry(@PathVariable Long countryId) {
 
-    //update country by id
-    @PutMapping("/{id}")
-    public ResponseEntity<Country> updateCountry
-        (@PathVariable Long id, Country countryDetails) {
-        Country updatedCountry
-                = countryService.updateCountry(id, countryDetails);
-        if (updatedCountry != null) {
-            return ResponseEntity.ok(updatedCountry);
-        } else {
-            return ResponseEntity.notFound().build();
+        if(!repository.existsById(countryId)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Country not found");
         }
-    }
-    //delete country by id
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCountry(@PathVariable Long id){
-        boolean isDeleted = countryService.deleteCountry(id);
-        if(isDeleted){
-            return ResponseEntity.noContent().build();
-        }else {
-            return ResponseEntity.notFound().build();
-        }
+
+        
+
+        // Delete all properties related to the country
+        propertyService.deletePropertiesByCountryId(countryId);
+
+        // Delete the country itself
+        countryService.deleteCountryById(countryId);
+
+        return new ResponseEntity<>("Country and related properties deleted successfully",HttpStatus.OK);
     }
 }

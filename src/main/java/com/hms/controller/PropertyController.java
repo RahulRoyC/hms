@@ -1,68 +1,85 @@
 package com.hms.controller;
 
+import com.hms.entity.Country;
+import com.hms.entity.Location;
 import com.hms.entity.Property;
-import com.hms.repo.PropertyRepository;
+import com.hms.entity.State;
+import com.hms.repository.CountryRepository;
+import com.hms.repository.LocationRepository;
+import com.hms.repository.PropertyRepository;
+import com.hms.repository.StateRepository;
 import com.hms.service.PropertyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hms.service.ReviewService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
-@RestController//takes the HTTP request
-@RequestMapping("/api/v1/properties")
+@RestController
+@RequestMapping("/api/v1/property")
 public class PropertyController {
 
-    @Autowired//to call the service layer
-    private PropertyService propertyService;
+    private PropertyService service;
+    private LocationRepository locationRepository;
+    private CountryRepository countryRepository;
+    private StateRepository stateRepository;
+    private PropertyRepository repository;
+    private ReviewService reviewService;
 
-    @Autowired
-    private PropertyRepository propertyRepository;
-
-    @GetMapping// for getting the list of properties
-    public List<Property> getAllProperties(){
-        return propertyService.getAllProperties();//call the Service layer
+    public PropertyController(PropertyService service, LocationRepository locationRepository, CountryRepository countryRepository, StateRepository stateRepository, PropertyRepository repository, ReviewService reviewService) {
+        this.service = service;
+        this.locationRepository = locationRepository;
+        this.countryRepository = countryRepository;
+        this.stateRepository = stateRepository;
+        this.repository = repository;
+        this.reviewService = reviewService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Property> getPropertyById(@PathVariable Long id){
-        Property property = propertyService.getPropertyById(id);
-        if(property != null){
-            return ResponseEntity.ok(property);
-        }else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    //Create Property
+    //for adding properties
     @PostMapping
-    public Property createProperty(
+    public ResponseEntity<Property> addProperty(
+            @RequestParam Long locationId,
+            @RequestParam Long countryId,
+            @RequestParam Long stateId,
             @RequestBody Property property
     ){
-         return propertyService.createProperty(property);
+        Location location = locationRepository.findById(locationId).get();
+        Country country = countryRepository.findById(countryId).get();
+        State state = stateRepository.findById(stateId).get();
+        property.setCountry(country);
+        property.setLocation(location);
+        property.setState(state);
+
+        Property added = service.addProperties(property);
+
+        return new ResponseEntity<>(added, HttpStatus.CREATED);
+
     }
 
-    //Update Property By Id
-    @PutMapping("/{id}")
-    public ResponseEntity<Property> updateProperty(
-            @PathVariable Long id, @RequestBody Property propertyDetails
-    ){
-        Property propertyUpdated = propertyService.updateProperty(id,propertyDetails);
-        if (propertyUpdated != null){
-            return ResponseEntity.ok(propertyUpdated);
-        }else {
-            return ResponseEntity.notFound().build();
+    //method to delete properties by proerties id
+    @DeleteMapping("/{propertyId}")
+    public ResponseEntity<?> deleteProperty(@PathVariable Long propertyId){
+
+        if (!repository.existsById(propertyId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Country not found");
         }
+        //delete all reviews related to this property id
+        reviewService.deleteReviewsByPropertyId(propertyId);
 
+        //delete all properties by propertyId
+        service.deletePropertyById(propertyId);
+
+        return new ResponseEntity<>("PropertyDeleted",HttpStatus.OK);
     }
 
-    //Delete property by ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePropertyById(@PathVariable Long id){
-       boolean deleted= propertyService.deleteProperty(id);
-       if(deleted){
-           return  ResponseEntity.noContent().build();
-       }else {
-           return ResponseEntity.notFound().build();
-       }
+    @GetMapping("/searchHotels")
+    public List<Property> searchHotels(@RequestParam String name){
+
+        List<Property> list = service.searchHotelByLocation(name);
+
+        return list;
     }
+
 }

@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "country")
-public class Country {
+@Table(name = "location")
+public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -16,9 +16,6 @@ public class Country {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-//    @OneToMany(mappedBy = "country")
-//    private List<Property> properties;
 
 
 

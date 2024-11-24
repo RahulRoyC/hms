@@ -17,24 +17,28 @@ public class Property {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "no_of_guests", nullable = false)
-    private Integer no_of_guests;
+    @Column(name = "no_of_guest", nullable = false)
+    private Integer noOfGuest;
 
     @Column(name = "no_of_bedrooms", nullable = false)
-    private Integer no_of_bedrooms;
-
-    @Column(name = "no_of_bathrooms", nullable = false)
-    private Integer no_of_bathrooms;
+    private Integer noOfBedrooms;
 
     @Column(name = "no_of_beds", nullable = false)
-    private Integer no_of_beds;
+    private String noOfBeds;
+
+    @Column(name = "no_of_bathrooms", nullable = false)
+    private String noOfBathrooms;
 
     @ManyToOne
     @JoinColumn(name = "country_id")
     private Country country;
 
     @ManyToOne
-    @JoinColumn(name = "city_id")
-    private City city;
+    @JoinColumn(name = "location_id")
+    private Location location;
+
+    @ManyToOne
+    @JoinColumn(name = "state_id")
+    private State state;
 
 }

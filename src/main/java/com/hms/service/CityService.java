@@ -1,7 +1,7 @@
 package com.hms.service;
 
 import com.hms.entity.City;
-import com.hms.repo.CityRepository;
+import com.hms.repository.CityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

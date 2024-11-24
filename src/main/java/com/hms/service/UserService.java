@@ -1,8 +1,8 @@
 package com.hms.service;
 
 import com.hms.entity.AppUser;
-import com.hms.payload.LoginDto;
-import com.hms.repo.AppUserRepository;
+import com.hms.payload.LogInDto;
+import com.hms.repository.AppUserRepository;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +20,14 @@ public class UserService {
     }
 
     //Verify the username and password
-    public String verifyLogin(LoginDto dto){
+    public String verifyLogin(LogInDto dto){
         //fetch the data from db
-        Optional<AppUser> optionalAppUser = appUserRepository.findByUsername(dto.getUsername());//to search the data we used appUserRepo
+        Optional<AppUser> optionalAppUser = appUserRepository.findByUserName(dto.getUserName());//to search the data we used appUserRepo
         if(optionalAppUser.isPresent()){
             AppUser appUser = optionalAppUser.get();
              if(BCrypt.checkpw(dto.getPassword(), appUser.getPassword())){
                  //generate token
-                 String token = jwtService.generateToken(appUser.getUsername());
+                 String token = jwtService.generateToken(appUser.getUserName());
                  return token;
              }
         }else {

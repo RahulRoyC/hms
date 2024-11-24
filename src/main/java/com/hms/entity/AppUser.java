@@ -1,6 +1,5 @@
 package com.hms.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,8 +14,8 @@ public class AppUser {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true)
-    private String username;
+    @Column(name = "user_name", nullable = false, unique = true)
+    private String userName;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
